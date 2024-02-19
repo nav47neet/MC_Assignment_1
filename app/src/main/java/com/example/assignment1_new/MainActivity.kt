@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
             val (nextStopReached, setNextStopReached) = remember { mutableStateOf(false) }
             var currentStopIndex by remember { mutableStateOf(0) }
             var totalDistanceCovered by remember { mutableStateOf(0f) }
-            val distanceRegex = Regex("[0-9.]+") // Match any sequence of digits or decimals
+            val distanceRegex = Regex("[0-9.]+")
             var totalDistanceLeft by remember {
                 mutableStateOf(
                     stations.sumOf { station ->
@@ -70,11 +70,11 @@ class MainActivity : ComponentActivity() {
                                 Button(
                                     onClick = {
                                         setShowInKilometers(!showInKilometers)
-                                        // Update total distance left based on the changed distance unit
                                         totalDistanceLeft = stations.sumOf { station ->
                                             val distanceString =
                                                 if (showInKilometers) station.distanceKm else station.distanceMiles
-                                            distanceRegex.find(distanceString)?.value?.toDouble() ?: 0.0
+                                            distanceRegex.find(distanceString)?.value?.toDouble()
+                                                ?: 0.0
                                         }.toFloat()
                                     },
                                     modifier = Modifier
@@ -87,24 +87,18 @@ class MainActivity : ComponentActivity() {
                                     onClick = {
                                         if (!nextStopReached) {
                                             setNextStopReached(true)
-                                            // Calculate the distance to the next stop
                                             val distanceToNextStop = if (showInKilometers)
                                                 stations[currentStopIndex].distanceKm.split(" ")[0].toFloat()
                                             else
                                                 stations[currentStopIndex].distanceMiles.split(" ")[0].toFloat()
-                                            // Add the distance to the total distance covered
                                             totalDistanceCovered += distanceToNextStop
-                                            // Subtract the distance to the next stop from the total distance left
                                             totalDistanceLeft -= distanceToNextStop
-                                            // Remove the reached station
                                             stationsState.value.removeAt(0)
-                                            // Increment the current stop index
                                             currentStopIndex++
-                                            // Set the flag for the next stop reached
-                                            reachedStations.value = reachedStations.value.mapIndexed { index, reached ->
-                                                index == currentStopIndex
-                                            }
-                                            // Reset the flag for the next stop reached
+                                            reachedStations.value =
+                                                reachedStations.value.mapIndexed { index, reached ->
+                                                    index == currentStopIndex
+                                                }
                                             setNextStopReached(false)
                                         }
                                     },
@@ -147,7 +141,7 @@ fun CustomTopAppBar() {
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp),
-        color = Color(0xFFA7D397), // Change the color as per your theme
+        color = Color(0xFFA7D397),
     ) {
         Row(
             modifier = Modifier
@@ -158,7 +152,7 @@ fun CustomTopAppBar() {
             Text(
                 text = "Journey Assistant",
                 style = MaterialTheme.typography.titleLarge,
-                color = Color(0xFFF5EEC8), // Change the color as per your theme
+                color = Color(0xFFF5EEC8),
                 modifier = Modifier.weight(1f)
             )
         }
@@ -175,7 +169,6 @@ fun CustomProgressBar(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        // Station Dots Row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -187,7 +180,6 @@ fun CustomProgressBar(
             }
         }
 
-        // Linear Progress Indicator
         LinearProgressIndicator(
             progress = progress + 0.01f,
             color = Color(0xFFF5E8C7),
@@ -260,7 +252,6 @@ fun JourneyProgressIndicator(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Text indicating current stop and distance
             Text(
                 text = "Current Stop: ${stations[currentStopIndex].name} - ${
                     if (showInKilometers) stations[currentStopIndex].distanceKm
@@ -270,7 +261,6 @@ fun JourneyProgressIndicator(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            // Text indicating total distance covered and total distance left
             Text(
                 text = "Total Distance Covered: ${
                     if (showInKilometers) "$totalDistanceCovered km"
@@ -288,7 +278,6 @@ fun JourneyProgressIndicator(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // Progress Bar
             CustomProgressBar(
                 progress = totalDistanceCovered / (totalDistanceCovered + totalDistanceLeft),
                 reachedStations = reachedStations
